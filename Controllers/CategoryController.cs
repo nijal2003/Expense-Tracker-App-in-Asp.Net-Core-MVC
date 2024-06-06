@@ -21,123 +21,51 @@ namespace Expense_Tracker.Controllers
         // GET: Category
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Categories.ToListAsync());
+            return _context.Categories != null ?
+                        View(await _context.Categories.ToListAsync()) :
+                        Problem("Entity set 'ApplicationDbContext.Categories'  is null.");
         }
 
-        // GET: Category/Details/5
-        public async Task<IActionResult> Details(int? id)
+
+        // GET: Category/AddOrEdit
+        public IActionResult AddOrEdit(int id = 0)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == 0)
+                return View(new Category());
+            else
+                return View(_context.Categories.Find(id));
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.CategoryId == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
         }
 
-        // GET: Category/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Category/Create
+        // POST: Category/AddOrEdit
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CategoryId,Title,Icon,Type")] Category category)
+        public async Task<IActionResult> AddOrEdit([Bind("CategoryId,Title,Icon,Type")] Category category)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
+                if (category.CategoryId == 0)
+                    _context.Add(category);
+                else
+                    _context.Update(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
         }
 
-        // GET: Category/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-            return View(category);
-        }
-
-        // POST: Category/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CategoryId,Title,Icon,Type")] Category category)
-        {
-            if (id != category.CategoryId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(category);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CategoryExists(category.CategoryId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(category);
-        }
-
-        // GET: Category/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.CategoryId == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
-        }
 
         // POST: Category/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (_context.Categories == null)
+            {
+                return Problem("Entity set 'ApplicationDbContext.Categories'  is null.");
+            }
             var category = await _context.Categories.FindAsync(id);
             if (category != null)
             {
@@ -148,9 +76,5 @@ namespace Expense_Tracker.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CategoryExists(int id)
-        {
-            return _context.Categories.Any(e => e.CategoryId == id);
-        }
     }
 }

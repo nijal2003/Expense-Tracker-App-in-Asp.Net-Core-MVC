@@ -7,8 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 //DI
-builder.Services.AddDbContext<ApplicationDbContext>(option => 
-option.UseSqlServer(builder.Configuration.GetConnectionString("DevConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("DevConnection")));
+
+//Register Syncfusion license
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NBaF1cXmhPYVJ1WmFZfVpgdl9DYVZSRGYuP1ZhSXxXdkNjX39cdXVWRmBbUEc=");
 
 var app = builder.Build();
 
@@ -25,6 +28,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
 app.Run();
